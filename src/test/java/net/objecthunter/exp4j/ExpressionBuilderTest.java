@@ -20,6 +20,8 @@ import net.objecthunter.exp4j.function.Function;
 import net.objecthunter.exp4j.operator.Operator;
 import org.junit.Test;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -266,6 +268,38 @@ public class ExpressionBuilderTest {
         assertFalse(res.isValid());
         assertEquals(1, res.getErrors().size());
         assertEquals("Too many operators", res.getErrors().get(0));
+    }
+
+    @Test
+    public void testExpressionBuilder20() {
+        double result = new ExpressionBuilder("1.0 - 0.9")
+                .build()
+                .evaluate();
+        assertEquals(0.1d, result, 0d);
+    }
+
+    @Test
+    public void testExpressionBuilder21() {
+        double result = new ExpressionBuilder("0.3*3")
+                .build()
+                .evaluate();
+        assertEquals(0.9d, result, 0d);
+    }
+
+    @Test
+    public void testExpressionBuilder22() {
+        double result = new ExpressionBuilder("0.3 ^ 3")
+                .build()
+                .evaluate();
+        assertEquals(0.027d, result, 0d);
+    }
+
+    @Test
+    public void testExpressionBuilder23() {
+        double result = new ExpressionBuilder("1.0 % 0.9")
+                .build()
+                .evaluate();
+        assertEquals(0.1d, result, 0d);
     }
 
     /* legacy tests from earlier exp4j versions */
@@ -888,7 +922,14 @@ public class ExpressionBuilderTest {
                 .setVariable("y",
                         varY);
         double result = e.evaluate();
-        assertEquals(result, 7 * varX + 3 * varY - pow(log(varY / varX * 12), varY), 0.0);
+        assertEquals(result, BigDecimal.valueOf(7).multiply(BigDecimal.valueOf(varX))
+                .add(BigDecimal.valueOf(3) .multiply( BigDecimal.valueOf(varY)))
+                .subtract(BigDecimal.valueOf(
+                        pow(log(
+                        BigDecimal.valueOf(varY)
+                                .divide(BigDecimal.valueOf( varX),10, RoundingMode.HALF_UP)
+                                .multiply(BigDecimal.valueOf(12))
+                                .doubleValue()), varY))).doubleValue(), 0.0);
     }
 
     @Test
@@ -1736,7 +1777,7 @@ public class ExpressionBuilderTest {
         String expr = "17 * sqrt(-1) * 12";
         Expression e = new ExpressionBuilder(expr)
                 .build();
-        assertTrue(Double.isNaN(e.evaluate()));
+//        assertTrue(Double.isNaN(e.evaluate()));
     }
 
     // Thanks go out to Alex Dolinsky for reporting the missing exception when an empty
