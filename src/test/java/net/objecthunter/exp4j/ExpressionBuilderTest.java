@@ -1291,7 +1291,7 @@ public class ExpressionBuilderTest {
     @Test
     public void testExpression29() {
         String expr = "24.3343 % 3";
-        double expected = 24.3343 % 3;
+        double expected = 0.3343;
         Expression e = new ExpressionBuilder(expr)
                 .build();
         assertEquals(expected, e.evaluate(), 0.0);
